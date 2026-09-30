@@ -1,0 +1,46 @@
+{
+  "orders": [],
+  "reviews": [
+    {
+      "id": "r1",
+      "product": "eggless-chocolate-truffle-cake",
+      "name": "Ananya R.",
+      "rating": 5,
+      "text": "Ordered for my dad's birthday. Nobody could tell it was eggless. Super soft.",
+      "createdAt": "2026-09-26T11:09:45.360Z"
+    },
+    {
+      "id": "r2",
+      "product": "eggless-chocolate-truffle-cake",
+      "name": "Karthik M.",
+      "rating": 5,
+      "text": "Rich ganache, not overly sweet. Arrived right on time.",
+      "createdAt": "2026-09-23T11:09:45.360Z"
+    },
+    {
+      "id": "r3",
+      "product": "pistachio-rose-cake",
+      "name": "Meera S.",
+      "rating": 4,
+      "text": "Lovely flavour. The rose is subtle, which I liked.",
+      "createdAt": "2026-09-20T11:09:45.360Z"
+    },
+    {
+      "id": "r4",
+      "product": "red-velvet-cake",
+      "name": "Rahul D.",
+      "rating": 5,
+      "text": "Best red velvet I have had. The cream cheese frosting is perfect.",
+      "createdAt": "2026-09-17T11:09:45.360Z"
+    },
+    {
+      "id": "r5",
+      "product": "fudgy-brownie-box",
+      "name": "Divya P.",
+      "rating": 5,
+      "text": "Gooey, chocolatey and gone in ten minutes.",
+      "createdAt": "2026-09-14T11:09:45.360Z"
+    }
+  ],
+  "messages": []
+}
