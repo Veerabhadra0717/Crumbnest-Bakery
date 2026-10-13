@@ -23,6 +23,29 @@ app.disable('x-powered-by');
 app.use(compression());
 app.use(express.json({ limit: '20kb' }));
 
+// SEO: one canonical address for every page.
+// 1) Send visitors on the wrong host (e.g. the .onrender.com address once you
+//    have a custom domain, or www vs non-www) to the main address.
+// 2) Remove trailing slashes so /cakes/ and /cakes aren't seen as two pages.
+const CANONICAL_HOST = process.env.BASE_URL ? new URL(process.env.BASE_URL).host : null;
+app.use((req, res, next) => {
+  if (!['GET', 'HEAD'].includes(req.method) || req.path.startsWith('/api')) return next();
+  const query = req.url.slice(req.path.length);
+  let pathname = req.path;
+  if (pathname.length > 1 && pathname.endsWith('/')) pathname = pathname.replace(/\/+$/, '');
+  const wrongHost = CANONICAL_HOST && req.get('host') !== CANONICAL_HOST && !/^localhost|^127\./.test(req.hostname);
+  if (wrongHost) return res.redirect(301, process.env.BASE_URL.replace(/\/$/, '') + pathname + query);
+  if (pathname !== req.path) return res.redirect(301, pathname + query);
+  next();
+});
+
+// SEO: keep private/utility pages out of Google's results.
+// (noindex works better than robots.txt Disallow, which can't stop indexing.)
+app.use(['/admin', '/cart', '/track'], (req, res, next) => {
+  res.set('X-Robots-Tag', 'noindex, follow');
+  next();
+});
+
 // Basic security headers
 app.use((req, res, next) => {
   res.set({
@@ -277,15 +300,16 @@ app.get('/eggless-chocolate-cake.html', (req, res) => res.redirect(301, '/cakes/
 app.get('/index.html', (req, res) => res.redirect(301, '/'));
 
 app.get('/robots.txt', (req, res) => {
-  res.type('text/plain').send(`User-agent: *\nAllow: /\nDisallow: /admin\nDisallow: /cart\nDisallow: /api/\n\nSitemap: ${pages.BASE_URL}/sitemap.xml\n`);
+  res.type('text/plain').send(`User-agent: *\nAllow: /\nDisallow: /api/\n\nSitemap: ${pages.BASE_URL}/sitemap.xml\n`);
 });
 
 app.get('/sitemap.xml', (req, res) => {
-  const urls = ['/', '/cakes', ...products.map((p) => `/cakes/${p.slug}`), '/about', '/contact', '/track'];
-  const today = todayISO();
+  // Only pages worth showing in Google. No <lastmod>: a date that changes every
+  // day teaches Google to ignore it.
+  const urls = ['/', '/cakes', ...products.map((p) => `/cakes/${p.slug}`), '/about', '/contact'];
   res.type('application/xml').send(
     `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls
-      .map((u) => `  <url><loc>${pages.BASE_URL}${u}</loc><lastmod>${today}</lastmod></url>`)
+      .map((u) => `  <url><loc>${pages.BASE_URL}${u}</loc></url>`)
       .join('\n')}\n</urlset>\n`
   );
 });
